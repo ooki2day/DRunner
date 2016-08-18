@@ -8,20 +8,27 @@
 
 #include "qt-solutions/qtservice/src/qtservice.h"
 
-class Server : public QTcpServer
+class Server : public QObject
 {
     Q_OBJECT
 
 public:
     Server(QObject *parent = 0);
-    void incomingConnection(int socket);
+    ~Server();
+
+    bool isListening();
+    void closeServer();
 
 signals:
-    void recvData(QString str);
+    void recvCommandFromSocket(const QByteArray &command);
 
 private slots:
-    void recvCommandFromSocket();
     void closeSocket();
+    void newConnection();
+    void socketReadyRead();
+
+private:
+    QTcpServer *m_server;
 };
 
 #endif // SERVER_H

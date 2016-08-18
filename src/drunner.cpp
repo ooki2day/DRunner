@@ -24,7 +24,7 @@ void DRunner::writeToLogFile(QString text) {
 
     if(m_logFile->open(QIODevice::Append | QIODevice::Text)) {
 
-        qDebug() << m_logFile->write(text.toLocal8Bit());
+        m_logFile->write(text.toLocal8Bit());
         m_logFile->close();
     }
 
@@ -84,7 +84,7 @@ void DRunner::start() {
 
     parseArgs(QCoreApplication::arguments());
 
-    connect(m_server, &Server::recvData,
+    connect(m_server, &Server::recvCommandFromSocket,
             this, &DRunner::writeToLogFile);
 }
 

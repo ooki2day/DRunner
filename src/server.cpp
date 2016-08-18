@@ -1,24 +1,28 @@
 #include "server.h"
 
 Server::Server(QObject *parent) :
-    QTcpServer(parent)
+    QObject(parent)
 {
-    listen(QHostAddress::Any, PORT);
+    m_server = new QTcpServer(this);
+
+    connect(m_server, &QTcpServer::newConnection,
+            this, &Server::newConnection);
 }
 
-void Server::incomingConnection(int socket) {
+bool Server::isListening() {
 
-    auto *sock = new QTcpSocket(this);
-    connect(sock, &QTcpSocket::readyRead, this, &Server::recvCommandFromSocket);
-    connect(sock, &QTcpSocket::disconnected, this, &Server::closeSocket);
-
-    sock->setSocketDescriptor(socket);
-
-    QtServiceBase::instance()->logMessage("connect");
-    emit recvData("connect");
+    return m_server->isListening() ? true : m_server->listen(QHostAddress::Any, PORT);
 }
 
-void Server::recvCommandFromSocket() {
+void Server::newConnection() {
+
+    auto socket = m_server->nextPendingConnection();
+
+    connect(socket, &QTcpSocket::readyRead, this, &Server::socketReadyRead);
+    connect(socket, &QTcpSocket::disconnected, this, &Server::closeSocket);
+}
+
+void Server::socketReadyRead() {
 
     auto sock = (QTcpSocket*)sender();
 
@@ -26,7 +30,7 @@ void Server::recvCommandFromSocket() {
 
         auto data = sock->readLine();
 
-        qDebug() << data;
+        emit recvCommandFromSocket(data);
     }
 }
 
@@ -34,5 +38,14 @@ void Server::closeSocket() {
 
     auto sock = (QTcpSocket*)sender();
     sock->deleteLater();
-    qDebug() << "disconnect";
+}
+
+void Server::closeServer() {
+
+    m_server->close();
+}
+
+Server::~Server() {
+
+    closeServer();
 }
