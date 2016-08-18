@@ -1,4 +1,4 @@
-**/buildir
-**/*.user
+buildir/
+*.user
 *~
 
