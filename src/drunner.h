@@ -7,12 +7,17 @@
 
 #include "server.h"
 
-class DRunner : public QtService<QCoreApplication>
+class DRunner : public QObject, public QtService<QCoreApplication>
 {
+
+    Q_OBJECT
+
 public:
     DRunner(int argc, char **argv);
-    void writeToLogFile(QString text);
     ~DRunner();
+
+public slots:
+    void writeToLogFile(QString text);
 
 protected:
     void start();

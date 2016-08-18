@@ -16,6 +16,9 @@ public:
     Server(QObject *parent = 0);
     void incomingConnection(int socket);
 
+signals:
+    void recvData(QString str);
+
 private slots:
     void recvCommandFromSocket();
     void closeSocket();

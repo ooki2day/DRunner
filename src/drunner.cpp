@@ -83,6 +83,9 @@ void DRunner::start() {
     }
 
     parseArgs(QCoreApplication::arguments());
+
+    connect(m_server, &Server::recvData,
+            this, &DRunner::writeToLogFile);
 }
 
 DRunner::~DRunner()

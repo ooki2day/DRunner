@@ -14,7 +14,8 @@ void Server::incomingConnection(int socket) {
 
     sock->setSocketDescriptor(socket);
 
-//    QtServiceBase::instance()->logMessage("");
+    QtServiceBase::instance()->logMessage("connect");
+    emit recvData("connect");
 }
 
 void Server::recvCommandFromSocket() {
@@ -33,4 +34,5 @@ void Server::closeSocket() {
 
     auto sock = (QTcpSocket*)sender();
     sock->deleteLater();
+    qDebug() << "disconnect";
 }
