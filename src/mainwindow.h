@@ -1,22 +1,23 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <QMainWindow>
+#define PORT 12345
 
-namespace Ui {
-class MainWindow;
-}
+#include "qt-solutions/qtservice/src/qtservice.h"
 
-class MainWindow : public QMainWindow
+class DRunner : public QtService<QCoreApplication>
 {
     Q_OBJECT
 
-public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+protected:
+    void start();
 
 private:
-    Ui::MainWindow *ui;
+
+
+public:
+    DRunner(int argc, char **argv);
+    ~DRunner();
 };
 
 #endif // MAINWINDOW_H

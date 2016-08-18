@@ -1,14 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+DRunner::DRunner(int argc, char **argv) :
+    QtService<QCoreApplication>(argc, argv, "DRunner")
 {
-    ui->setupUi(this);
+    setServiceDescription("A dummy HTTP service implemented with Qt");
+    setServiceFlags(QtServiceBase::CanBeSuspended);
 }
 
-MainWindow::~MainWindow()
+void DRunner::start() {
+
+    QCoreApplication *app = application();
+
+    const QStringList args = QCoreApplication::arguments();
+}
+
+DRunner::~DRunner()
 {
-    delete ui;
 }

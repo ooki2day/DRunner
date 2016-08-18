@@ -151,7 +151,7 @@ protected:
 #else
         const QStringList arguments = QCoreApplication::arguments();
         quint16 port = (arguments.size() > 1) ?
-                arguments.at(1).toUShort() : 8080;
+                arguments.at(1).toUShort() : 1234;
 #endif
         daemon = new HttpDaemon(port, app);
 
