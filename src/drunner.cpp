@@ -7,26 +7,71 @@ DRunner::DRunner(int argc, char **argv) :
 {
     setServiceDescription("A dummy HTTP service implemented with Qt");
     setServiceFlags(QtServiceBase::CanBeSuspended);
-
-    initLogFile();
 }
 
-void DRunner::initLogFile() {
+bool DRunner::initLogFile() {
 
-    m_logFile = new QFile(QDir::tempPath() + "/log");
-    m_logFile->open(QIODevice::WriteOnly | QIODevice::Text);
+    m_logFile = new QFile(QDir::tempPath() + "/DRunner.log");
+    if(m_logFile->open(QIODevice::WriteOnly)) {
+
+        m_logFile->close();
+        return true;
+    }
+    return false;
 }
 
 void DRunner::writeToLogFile(QString text) {
 
-    m_logFile->write(text.toLocal8Bit());
+    if(m_logFile->open(QIODevice::Append | QIODevice::Text)) {
+
+        qDebug() << m_logFile->write(text.toLocal8Bit());
+        m_logFile->close();
+    }
+
+    logMessage(QObject::tr("Can't write to log file!"));
+}
+
+void DRunner::parseArgs(const QStringList &list) {
+
+    QFile file;
+    for(int i = 1; i < list.size(); ++i) {
+
+        file.setFileName(list.at(i));
+        if(file.exists()) {
+
+            readAllowedPrograms(file);
+            file.close();
+            return;
+        }
+    }
+
+    logMessage(QObject::tr("The file with allowed programs not exist."));
+}
+
+void DRunner::readAllowedPrograms(QFile &file) {
+
+
+    if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+
+        while(!file.atEnd()) {
+
+            m_allowedProgramsList.append(file.readLine());
+        }
+    } else {
+
+        logMessage(QObject::tr("Can't open the file with allowed programs."));
+    }
 }
 
 void DRunner::start() {
 
     QCoreApplication *app = application();
+    if(!initLogFile()) {
 
-    const QStringList args = QCoreApplication::arguments();
+        logMessage(QObject::tr("Can't open the log file."));
+        app->quit();
+        return;
+    }
 
     m_server = new Server(app);
 
@@ -34,19 +79,13 @@ void DRunner::start() {
 
         logMessage(QObject::tr("Failed to start the server"), QtServiceBase::Error);
         app->quit();
+        return;
     }
 
-    if(!m_logFile->isOpen()) {
-
-        logMessage(QObject::tr("Can't open the log file. Close Program"));
-        app->quit();
-    }
-
-    writeToLogFile("started");
+    parseArgs(QCoreApplication::arguments());
 }
 
 DRunner::~DRunner()
 {
-    writeToLogFile("stopped");
-    m_logFile->close();
+    writeToLogFile("stopped \n");
 }

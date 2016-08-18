@@ -18,11 +18,14 @@ protected:
     void start();
 
 private:
-    void initLogFile();
+    bool initLogFile();
+    void parseArgs(const QStringList &list);
+    void readAllowedPrograms(QFile &file);
 
 private:
     Server *m_server;
     QFile *m_logFile;
+    QStringList m_allowedProgramsList;
 };
 
 #endif // MAINWINDOW_H
