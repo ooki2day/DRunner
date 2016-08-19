@@ -21,6 +21,7 @@ public:
 
 signals:
     void recvCommandFromSocket(const QByteArray &command);
+    void connectStateChanged(bool connected);
 
 private slots:
     void closeSocket();

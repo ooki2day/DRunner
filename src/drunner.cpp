@@ -1,12 +1,12 @@
 #include "drunner.h"
 
-#include <QDebug>
-
 DRunner::DRunner(int argc, char **argv) :
     QtService<QCoreApplication>(argc, argv, "DRunner")
 {
     setServiceDescription("A dummy HTTP service implemented with Qt");
     setServiceFlags(QtServiceBase::CanBeSuspended);
+
+    m_serverThread = new QThread();
 }
 
 bool DRunner::initLogFile() {
@@ -73,9 +73,7 @@ void DRunner::start() {
         return;
     }
 
-    m_server = new Server(app);
-
-    if(!m_server->isListening()) {
+    if(!serverInitCurrectly()) {
 
         logMessage(QObject::tr("Failed to start the server"), QtServiceBase::Error);
         app->quit();
@@ -83,12 +81,37 @@ void DRunner::start() {
     }
 
     parseArgs(QCoreApplication::arguments());
+}
+
+bool DRunner::serverInitCurrectly() {
+
+    m_server = new Server();
+    m_server->moveToThread(m_serverThread);
+    m_serverThread->start();
 
     connect(m_server, &Server::recvCommandFromSocket,
             this, &DRunner::writeToLogFile);
+    connect(m_serverThread, &QThread::finished,
+            m_server, &Server::deleteLater);
+    connect(m_server, &Server::connectStateChanged,
+            this, &DRunner::serverStateChanged);
+
+    return true;
+}
+
+void DRunner::serverStateChanged(bool connected) {
+
+    if(!connected) {
+
+        writeToLogFile("Server disconnected!");
+        auto app = application();
+        app->quit();
+    }
 }
 
 DRunner::~DRunner()
 {
-    writeToLogFile("stopped \n");
+    m_serverThread->quit();
+    m_serverThread->wait();
+    delete m_serverThread;
 }

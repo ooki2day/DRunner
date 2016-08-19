@@ -1,17 +1,15 @@
 #include "server.h"
 
+#include <QThread>
+
 Server::Server(QObject *parent) :
     QObject(parent)
 {
     m_server = new QTcpServer(this);
+    m_server->isListening() ? true : m_server->listen(QHostAddress::Any, PORT);
 
     connect(m_server, &QTcpServer::newConnection,
             this, &Server::newConnection);
-}
-
-bool Server::isListening() {
-
-    return m_server->isListening() ? true : m_server->listen(QHostAddress::Any, PORT);
 }
 
 void Server::newConnection() {
@@ -29,7 +27,6 @@ void Server::socketReadyRead() {
     if(sock->canReadLine()) {
 
         auto data = sock->readLine();
-
         emit recvCommandFromSocket(data);
     }
 }
