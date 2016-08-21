@@ -59,7 +59,7 @@ void DRunner::readAllowedProgramsFromFile(QFile &file) {
         QStringList list;
         while(!file.atEnd()) {
 
-            list.append(file.readLine());
+            list.append(file.readLine().simplified());
         }
 
         m_launcher->setAllowedList(list);
@@ -117,6 +117,7 @@ void DRunner::serverStateChanged(bool connected) {
 
 DRunner::~DRunner()
 {
+    qDebug() << "stop";
     m_serverThread->quit();
     m_launcherThread->quit();
     m_serverThread->wait();

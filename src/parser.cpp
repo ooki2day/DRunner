@@ -29,12 +29,15 @@ Utils::ParsedData Parser::parseData(const QByteArray &data) {
 
     for(int i = 1; i < list.size(); ++i) {
 
-        timeout = list.at(i).toInt(&ok);
+        timeout = list.at(i).simplified().toInt(&ok);
         if(ok && timeout > 0) {
 
             parsed.timeout = timeout;
+
+        } else {
+
+            parsed.args << list.at(i).simplified();
         }
-        parsed.args << list.at(i).simplified();
     }
 
     return parsed;
