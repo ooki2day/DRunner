@@ -7,6 +7,7 @@
 #include <QThread>
 
 #include "server.h"
+#include "processlauncher.h"
 
 class DRunner : public QObject, public QtService<QCoreApplication>
 {
@@ -27,16 +28,18 @@ private slots:
     void serverStateChanged(bool connected);
 
 private:
-    bool initLogFile();
+    void initLogFile();
     void parseArgs(const QStringList &list);
     void readAllowedProgramsFromFile(QFile &file);
-    bool serverInitCurrectly();
+    void serverInit();
+    void launcherInit();
 
 private:
     Server *m_server;
-    QFile *m_logFile;
-    QStringList m_allowedProgramsList;
     QThread *m_serverThread;
+    ProcessLauncher *m_launcher;
+    QThread *m_launcherThread;
+    QFile *m_logFile;
 };
 
 #endif // MAINWINDOW_H

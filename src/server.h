@@ -25,12 +25,12 @@ public:
 signals:
     void recvCommandFromSocket(const QByteArray &command);
     void connectStateChanged(bool connected);
+    void parsedDataReady(const Utils::SocketData &data);
 
 private slots:
     void closeSocket();
     void newConnection();
     void socketReadyRead();
-    void getParsedData(const Utils::SocketData &data);
 
 private:
     QTcpServer *m_server;

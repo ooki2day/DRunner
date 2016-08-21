@@ -30,16 +30,10 @@ void Server::socketReadyRead() {
 
         Parser *parser = new Parser { sock->socketDescriptor(), data };
         connect(parser, &Parser::socketDataReady,
-                this, &Server::getParsedData);
+                this, &Server::parsedDataReady);
 
         QThreadPool::globalInstance()->start(parser);
     }
-}
-
-void Server::getParsedData(const Utils::SocketData &data) {
-
-    ProcessLauncher *launcher = new ProcessLauncher(this);
-    launcher->startNewProcess(data);
 }
 
 void Server::closeSocket() {

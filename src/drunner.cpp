@@ -7,17 +7,21 @@ DRunner::DRunner(int argc, char **argv) :
     setServiceFlags(QtServiceBase::CanBeSuspended);
 
     m_serverThread = new QThread();
+    m_launcherThread = new QThread();
 }
 
-bool DRunner::initLogFile() {
+void DRunner::initLogFile() {
 
     m_logFile = new QFile(QDir::tempPath() + "/DRunner.log");
     if(m_logFile->open(QIODevice::WriteOnly)) {
 
         m_logFile->close();
-        return true;
+        return;
     }
-    return false;
+
+    auto app = application();
+    logMessage(QObject::tr("Can't open the log file."));
+    app->quit();
 }
 
 void DRunner::writeToLogFile(QString text) {
@@ -50,13 +54,16 @@ void DRunner::parseArgs(const QStringList &list) {
 
 void DRunner::readAllowedProgramsFromFile(QFile &file) {
 
-
     if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 
+        QStringList list;
         while(!file.atEnd()) {
 
-            m_allowedProgramsList.append(file.readLine());
+            list.append(file.readLine());
         }
+
+        m_launcher->setAllowedList(list);
+
     } else {
 
         logMessage(QObject::tr("Can't open the file with allowed programs."));
@@ -65,27 +72,16 @@ void DRunner::readAllowedProgramsFromFile(QFile &file) {
 
 void DRunner::start() {
 
-    auto *app = application();
-    if(!initLogFile()) {
-
-        logMessage(QObject::tr("Can't open the log file."));
-        app->quit();
-        return;
-    }
-
-    if(!serverInitCurrectly()) {
-
-        logMessage(QObject::tr("Failed to start the server"), QtServiceBase::Error);
-        app->quit();
-        return;
-    }
+    serverInit();
+    launcherInit();
+    initLogFile();
 
     parseArgs(QCoreApplication::arguments());
 }
 
-bool DRunner::serverInitCurrectly() {
+void DRunner::serverInit() {
 
-    m_server = new Server();
+    m_server = new Server;
     m_server->moveToThread(m_serverThread);
     m_serverThread->start();
 
@@ -95,8 +91,18 @@ bool DRunner::serverInitCurrectly() {
             m_server, &Server::deleteLater);
     connect(m_server, &Server::connectStateChanged,
             this, &DRunner::serverStateChanged);
+}
 
-    return true;
+void DRunner::launcherInit() {
+
+    m_launcher = new ProcessLauncher;
+    m_launcher->moveToThread(m_launcherThread);
+    m_launcherThread->start();
+
+    connect(m_serverThread, &QThread::finished,
+            m_launcher, &ProcessLauncher::deleteLater);
+    connect(m_server, &Server::parsedDataReady,
+            m_launcher, &ProcessLauncher::startNewProcess);
 }
 
 void DRunner::serverStateChanged(bool connected) {
@@ -112,6 +118,10 @@ void DRunner::serverStateChanged(bool connected) {
 DRunner::~DRunner()
 {
     m_serverThread->quit();
+    m_launcherThread->quit();
     m_serverThread->wait();
+    m_launcherThread->wait();
+
     delete m_serverThread;
+    delete m_launcherThread;
 }
