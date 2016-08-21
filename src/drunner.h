@@ -29,7 +29,7 @@ private slots:
 private:
     bool initLogFile();
     void parseArgs(const QStringList &list);
-    void readAllowedPrograms(QFile &file);
+    void readAllowedProgramsFromFile(QFile &file);
     bool serverInitCurrectly();
 
 private:

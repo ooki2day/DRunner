@@ -39,7 +39,7 @@ void DRunner::parseArgs(const QStringList &list) {
         file.setFileName(list.at(i));
         if(file.exists()) {
 
-            readAllowedPrograms(file);
+            readAllowedProgramsFromFile(file);
             file.close();
             return;
         }
@@ -48,7 +48,7 @@ void DRunner::parseArgs(const QStringList &list) {
     logMessage(QObject::tr("The file with allowed programs not exist."));
 }
 
-void DRunner::readAllowedPrograms(QFile &file) {
+void DRunner::readAllowedProgramsFromFile(QFile &file) {
 
 
     if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
@@ -65,7 +65,7 @@ void DRunner::readAllowedPrograms(QFile &file) {
 
 void DRunner::start() {
 
-    QCoreApplication *app = application();
+    auto *app = application();
     if(!initLogFile()) {
 
         logMessage(QObject::tr("Can't open the log file."));

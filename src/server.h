@@ -5,8 +5,11 @@
 
 #include <QTcpServer>
 #include <QTcpSocket>
+#include <QThreadPool>
 
 #include "qt-solutions/qtservice/src/qtservice.h"
+#include "parser.h"
+#include "processlauncher.h"
 
 class Server : public QObject
 {
@@ -27,6 +30,7 @@ private slots:
     void closeSocket();
     void newConnection();
     void socketReadyRead();
+    void getParsedData(const Utils::SocketData &data);
 
 private:
     QTcpServer *m_server;

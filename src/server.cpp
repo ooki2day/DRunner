@@ -1,7 +1,5 @@
 #include "server.h"
 
-#include <QThread>
-
 Server::Server(QObject *parent) :
     QObject(parent)
 {
@@ -10,6 +8,8 @@ Server::Server(QObject *parent) :
 
     connect(m_server, &QTcpServer::newConnection,
             this, &Server::newConnection);
+
+    qRegisterMetaType<Utils::SocketData>("Utils::SocketData");
 }
 
 void Server::newConnection() {
@@ -27,8 +27,19 @@ void Server::socketReadyRead() {
     if(sock->canReadLine()) {
 
         auto data = sock->readLine();
-        emit recvCommandFromSocket(data);
+
+        Parser *parser = new Parser { sock->socketDescriptor(), data };
+        connect(parser, &Parser::socketDataReady,
+                this, &Server::getParsedData);
+
+        QThreadPool::globalInstance()->start(parser);
     }
+}
+
+void Server::getParsedData(const Utils::SocketData &data) {
+
+    ProcessLauncher *launcher = new ProcessLauncher(this);
+    launcher->startNewProcess(data);
 }
 
 void Server::closeSocket() {

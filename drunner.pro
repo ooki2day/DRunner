@@ -17,7 +17,9 @@ SOURCES += qt-solutions/qtservice/src/qtservice.cpp \
     qt-solutions/qtservice/src/qtunixsocket.cpp \
     src/main.cpp \
     src/server.cpp \
-    src/drunner.cpp
+    src/drunner.cpp \
+    src/parser.cpp \
+    src/processlauncher.cpp
 
 HEADERS  += qt-solutions/qtservice/src/QtService \
     qt-solutions/qtservice/src/qtservice.h \
@@ -27,4 +29,7 @@ HEADERS  += qt-solutions/qtservice/src/QtService \
     qt-solutions/qtservice/src/qtunixserversocket.h \
     qt-solutions/qtservice/src/qtunixsocket.h \
     src/server.h \
-    src/drunner.h
+    src/drunner.h \
+    src/parser.h \
+    src/processlauncher.h \
+    src/utils.h
