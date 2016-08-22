@@ -19,7 +19,6 @@ void Server::newConnection() {
     m_descriptorsHash[socket->socketDescriptor()] = socket;
     m_socketHash[socket] = socket->socketDescriptor();
 
-    qDebug() << socket->socketDescriptor();
     connect(socket, &QTcpSocket::readyRead, this, &Server::socketReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, &Server::closeSocket);
 }

@@ -68,25 +68,25 @@ void LogCollector::writeLog(qintptr descriptor) {
         QString text(QString(logData.m_address.toString() + " "
                              + QString::number(logData.m_port) + ":\n"));
 
-        text.append(QObject::tr("\nStarted programms:\n"));
+        text.append(QObject::tr("\nStarted programs:\n"));
         for(auto i : logData.m_startedPrograms) {
 
             text.append("    " + i + "\n");
         }
 
-        text.append(QObject::tr("\nFailed to start programms:\n"));
+        text.append(QObject::tr("\nFailed to start programs:\n"));
         for(auto i : logData.m_StartProgramErrors) {
 
             text.append("    " + i + "\n");
         }
 
-        text.append(QObject::tr("\nSelf-terminated programms:\n"));
+        text.append(QObject::tr("\nSelf-terminated programs:\n"));
         for(auto i : logData.m_selfTerminatedPrograms) {
 
             text.append("    " + i + "\n");
         }
 
-        text.append(QObject::tr("\nTimeouted programms:\n"));
+        text.append(QObject::tr("\nTimeouted programs:\n"));
         for(auto i : logData.m_timeoutTerminatedPrograms) {
 
             text.append("    " + i + "\n");

@@ -57,9 +57,11 @@ void ProcessLauncher::processStarted() {
 
 void ProcessLauncher::processError(QProcess::ProcessError error) {
 
-    auto proc = (QProcess*)sender();
+    if(error == QProcess::ProcessError::FailedToStart) {
 
-    emit programStartFailed(proc->property("descriptor").toInt(), proc->program(), error);
+        auto proc = (QProcess*)sender();
+        emit programStartFailed(proc->property("descriptor").toInt(), proc->program() + proc->errorString(), error);
+    }
 }
 
 void ProcessLauncher::timeout() {
@@ -102,9 +104,11 @@ void ProcessLauncher::stopAllProcesses() {
 
         i->close();
     }
+    m_activeProcessesList.clear();
 }
 
 ProcessLauncher::~ProcessLauncher() {
 
+    m_timeredProcessMap.clear();
     stopAllProcesses();
 }
