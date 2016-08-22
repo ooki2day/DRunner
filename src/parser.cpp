@@ -1,7 +1,5 @@
 #include "parser.h"
 
-#include <QDebug>
-
 Parser::Parser(qintptr descriptor, const QByteArray &data):
     m_desciptor(descriptor),
     m_data(data)
@@ -12,8 +10,8 @@ Parser::Parser(qintptr descriptor, const QByteArray &data):
 void Parser::run() {
 
     Utils::SocketData sockData;
-    sockData.data = parseData(m_data);
-    sockData.descriptor = m_desciptor;
+    sockData.m_data = parseData(m_data);
+    sockData.m_descriptor = m_desciptor;
 
     emit socketDataReady(sockData);
 }
@@ -25,18 +23,18 @@ Utils::ParsedData Parser::parseData(const QByteArray &data) {
     int timeout = 0;
 
     Utils::ParsedData parsed;
-    parsed.program = list.at(0).trimmed().simplified();
+    parsed.m_program = list.at(0).trimmed().simplified();
 
     for(int i = 1; i < list.size(); ++i) {
 
         timeout = list.at(i).simplified().toInt(&ok);
         if(ok && timeout > 0) {
 
-            parsed.timeout = timeout;
+            parsed.m_timeout = timeout;
 
         } else {
 
-            parsed.args << list.at(i).simplified();
+            parsed.m_args << list.at(i).simplified();
         }
     }
 

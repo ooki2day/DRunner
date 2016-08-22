@@ -12,24 +12,35 @@ TEMPLATE = app
 
 
 SOURCES += qt-solutions/qtservice/src/qtservice.cpp \
-    qt-solutions/qtservice/src/qtservice_unix.cpp \
-    qt-solutions/qtservice/src/qtunixserversocket.cpp \
-    qt-solutions/qtservice/src/qtunixsocket.cpp \
     src/main.cpp \
     src/server.cpp \
     src/drunner.cpp \
     src/parser.cpp \
-    src/processlauncher.cpp
+    src/processlauncher.cpp \
+    qt-solutions/qtservice/src/qtunixserversocket.cpp \
+    qt-solutions/qtservice/src/qtunixsocket.cpp \
+    src/logcollector.cpp
 
 HEADERS  += qt-solutions/qtservice/src/QtService \
     qt-solutions/qtservice/src/qtservice.h \
     qt-solutions/qtservice/src/qtservice_p.h \
     qt-solutions/qtservice/src/QtServiceBase \
     qt-solutions/qtservice/src/QtServiceController \
-    qt-solutions/qtservice/src/qtunixserversocket.h \
-    qt-solutions/qtservice/src/qtunixsocket.h \
     src/server.h \
     src/drunner.h \
     src/parser.h \
     src/processlauncher.h \
-    src/utils.h
+    src/utils.h \
+    qt-solutions/qtservice/src/qtunixserversocket.h \
+    qt-solutions/qtservice/src/qtunixsocket.h \
+    src/logcollector.h
+
+win32-g++: CONFIG(release, debug|release): {
+
+    SOURCES += qt-solutions/qtservice/src/qtservice_win.cpp
+}
+
+unix: {
+
+    SOURCES += qt-solutions/qtservice/src/qtservice_unix.cpp
+}

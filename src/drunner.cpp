@@ -8,31 +8,23 @@ DRunner::DRunner(int argc, char **argv) :
 
     m_serverThread = new QThread();
     m_launcherThread = new QThread();
+    m_logCollectorThread = new QThread();
+
+    qRegisterMetaType<qintptr>("qintptr");
 }
 
 void DRunner::initLogFile() {
 
-    m_logFile = new QFile(QDir::tempPath() + "/DRunner.log");
-    if(m_logFile->open(QIODevice::WriteOnly)) {
+    QFile file(QDir::tempPath() + "/" + QString(LOGFILENAME));
+    if(file.open(QIODevice::WriteOnly)) {
 
-        m_logFile->close();
+        file.close();
         return;
     }
 
     auto app = application();
     logMessage(QObject::tr("Can't open the log file."));
     app->quit();
-}
-
-void DRunner::writeToLogFile(QString text) {
-
-    if(m_logFile->open(QIODevice::Append | QIODevice::Text)) {
-
-        m_logFile->write(text.toLocal8Bit());
-        m_logFile->close();
-    }
-
-    logMessage(QObject::tr("Can't write to log file!"));
 }
 
 void DRunner::parseArgs(const QStringList &list) {
@@ -75,6 +67,7 @@ void DRunner::start() {
     serverInit();
     launcherInit();
     initLogFile();
+    logCollectorInit();
 
     parseArgs(QCoreApplication::arguments());
 }
@@ -85,8 +78,6 @@ void DRunner::serverInit() {
     m_server->moveToThread(m_serverThread);
     m_serverThread->start();
 
-    connect(m_server, &Server::recvCommandFromSocket,
-            this, &DRunner::writeToLogFile);
     connect(m_serverThread, &QThread::finished,
             m_server, &Server::deleteLater);
     connect(m_server, &Server::connectStateChanged,
@@ -103,13 +94,41 @@ void DRunner::launcherInit() {
             m_launcher, &ProcessLauncher::deleteLater);
     connect(m_server, &Server::parsedDataReady,
             m_launcher, &ProcessLauncher::startNewProcess);
+    connect(m_launcher, &ProcessLauncher::recvDataFromProcess,
+            m_server, &Server::sendToSocket);
+}
+
+void DRunner::logCollectorInit() {
+
+    m_logCollector = new LogCollector;
+    m_logCollector->moveToThread(m_logCollectorThread);
+    m_logCollectorThread->start();
+
+    connect(m_logCollectorThread, &QThread::finished,
+            m_logCollector, &LogCollector::deleteLater);
+
+    connect(m_server, &Server::socketDisconnected,
+            m_logCollector, &LogCollector::writeLog);
+    connect(m_server, &Server::recvDataFromSocket,
+            m_logCollector, &LogCollector::recvDataFromClient);
+
+    connect(m_launcher, &ProcessLauncher::recvDataFromProcess,
+            m_logCollector, &LogCollector::sendDataToClient);
+    connect(m_launcher, &ProcessLauncher::programSelfTerminated,
+            m_logCollector, &LogCollector::programSelfTermitated);
+    connect(m_launcher, &ProcessLauncher::programStarted,
+            m_logCollector, &LogCollector::programStarted);
+    connect(m_launcher, &ProcessLauncher::programStartFailed,
+            m_logCollector, &LogCollector::programStartFailed);
+    connect(m_launcher, &ProcessLauncher::programTimeout,
+            m_logCollector, &LogCollector::programTimeout);
 }
 
 void DRunner::serverStateChanged(bool connected) {
 
     if(!connected) {
 
-        writeToLogFile("Server disconnected!");
+        logMessage("Server disconnected!");
         auto app = application();
         app->quit();
     }
@@ -117,12 +136,14 @@ void DRunner::serverStateChanged(bool connected) {
 
 DRunner::~DRunner()
 {
-    qDebug() << "stop";
     m_serverThread->quit();
     m_launcherThread->quit();
+    m_logCollectorThread->quit();
     m_serverThread->wait();
     m_launcherThread->wait();
+    m_logCollectorThread->wait();
 
     delete m_serverThread;
     delete m_launcherThread;
+    delete m_logCollectorThread;
 }

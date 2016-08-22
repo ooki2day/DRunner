@@ -10,12 +10,16 @@ Server::Server(QObject *parent) :
             this, &Server::newConnection);
 
     qRegisterMetaType<Utils::SocketData>("Utils::SocketData");
+    qRegisterMetaType<QHostAddress>("QHostAddress");
 }
 
 void Server::newConnection() {
 
     auto socket = m_server->nextPendingConnection();
+    m_descriptorsHash[socket->socketDescriptor()] = socket;
+    m_socketHash[socket] = socket->socketDescriptor();
 
+    qDebug() << socket->socketDescriptor();
     connect(socket, &QTcpSocket::readyRead, this, &Server::socketReadyRead);
     connect(socket, &QTcpSocket::disconnected, this, &Server::closeSocket);
 }
@@ -32,18 +36,38 @@ void Server::socketReadyRead() {
         connect(parser, &Parser::socketDataReady,
                 this, &Server::parsedDataReady);
 
+        emit recvDataFromSocket(sock->socketDescriptor(), sock->peerAddress(), sock->peerPort(), data.size());
         QThreadPool::globalInstance()->start(parser);
+    }
+}
+
+void Server::sendToSocket(qintptr descriptor, const QByteArray &data) {
+
+    if(m_descriptorsHash.contains(descriptor)) {
+
+        m_descriptorsHash[descriptor]->write(data);
     }
 }
 
 void Server::closeSocket() {
 
     auto sock = (QTcpSocket*)sender();
+
+    if(m_socketHash.contains(sock)) {
+
+        emit socketDisconnected(m_socketHash[sock]);
+        m_socketHash.remove(sock);
+    }
+    if(m_descriptorsHash.contains(sock->socketDescriptor()))
+        m_descriptorsHash.remove(sock->socketDescriptor());
+
     sock->deleteLater();
 }
 
 void Server::closeServer() {
 
+    m_descriptorsHash.clear();
+    m_socketHash.clear();
     m_server->close();
 }
 

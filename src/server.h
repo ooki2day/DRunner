@@ -23,9 +23,13 @@ public:
     void closeServer();
 
 signals:
-    void recvCommandFromSocket(const QByteArray &command);
     void connectStateChanged(bool connected);
     void parsedDataReady(const Utils::SocketData &data);
+    void socketDisconnected(qintptr descriptor);
+    void recvDataFromSocket(qintptr descriptor, QHostAddress address, quint16 port, int dataSize);
+
+public slots:
+    void sendToSocket(qintptr descriptor, const QByteArray &data);
 
 private slots:
     void closeSocket();
@@ -34,6 +38,8 @@ private slots:
 
 private:
     QTcpServer *m_server;
+    QHash<qintptr, QTcpSocket*> m_descriptorsHash;
+    QHash<QTcpSocket*, qintptr> m_socketHash;
 };
 
 #endif // SERVER_H

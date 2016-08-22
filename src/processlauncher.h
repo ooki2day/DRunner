@@ -18,12 +18,22 @@ public:
 
     ~ProcessLauncher();
 
+signals:
+    void programStarted(qintptr descriptor, const QString &program);
+    void programStartFailed(qintptr descriptor, const QString &fail, QProcess::ProcessError error);
+    void programSelfTerminated(qintptr descriptor, const QString &program);
+    void programTimeout(qintptr descriptor, const QString &program);
+    void recvDataFromProcess(qintptr descriptor, const QByteArray &data);
+
 public slots:
     void startNewProcess(const Utils::SocketData &data);
 
 private slots:
     void processFinished(int exitCode, QProcess::ExitStatus status);
+    void processError(QProcess::ProcessError error);
+    void processStarted();
     void timeout();
+    void readFromProcess();
 
 private:
     bool isProgramAllowed(const QString &program);
@@ -31,6 +41,7 @@ private:
 
 private:
     QStringList m_allowedProgrammsList;
+    QMap<int, QProcess*> m_timeredProcessMap;
     QList<QProcess*> m_activeProcessesList;
 };
 
