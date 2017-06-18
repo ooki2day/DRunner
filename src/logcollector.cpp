@@ -3,13 +3,11 @@
 LogCollector::LogCollector(QObject *parent) :
     QObject(parent)
 {
-
 }
 
-void LogCollector::recvDataFromClient(qintptr descriptor, QHostAddress address, quint16 port, int dataSize) {
-
+void LogCollector::recvDataFromClient(qintptr descriptor, QHostAddress address,
+                                      quint16 port, int dataSize) {
     if(m_logDataHash.contains(descriptor)) {
-
         m_logDataHash[descriptor].m_bytesRead += dataSize;
         return;
     }
@@ -19,25 +17,20 @@ void LogCollector::recvDataFromClient(qintptr descriptor, QHostAddress address, 
 }
 
 void LogCollector::sendDataToClient(qintptr descriptor, const QByteArray &data) {
-
     if(m_logDataHash.contains(descriptor)) {
-
         m_logDataHash[descriptor].m_bytesWritten += data.size();
     }
 }
 
 void LogCollector::programStarted(qintptr descriptor, const QString &program) {
-
     if(m_logDataHash.contains(descriptor)) {
-
         m_logDataHash[descriptor].m_startedPrograms << program;
     }
 }
 
-void LogCollector::programStartFailed(qintptr descriptor, const QString &program, QProcess::ProcessError error) {
-
+void LogCollector::programStartFailed(qintptr descriptor, const QString &program,
+                                      QProcess::ProcessError error) {
     if(m_logDataHash.contains(descriptor)) {
-
         QString str(program);
         str.append(": " + error);
         m_logDataHash[descriptor].m_StartProgramErrors << program;
@@ -45,50 +38,40 @@ void LogCollector::programStartFailed(qintptr descriptor, const QString &program
 }
 
 void LogCollector::programSelfTermitated(qintptr descriptor, const QString &program) {
-
     if(m_logDataHash.contains(descriptor)) {
-
         m_logDataHash[descriptor].m_selfTerminatedPrograms << program;
     }
 }
 
 void LogCollector::programTimeout(qintptr descriptor, const QString &program) {
-
     if(m_logDataHash.contains(descriptor)) {
-
         m_logDataHash[descriptor].m_timeoutTerminatedPrograms << program;
     }
 }
 
 void LogCollector::writeLog(qintptr descriptor) {
-
     if(m_logDataHash.contains(descriptor)) {
-
         auto logData = m_logDataHash.take(descriptor);
         QString text(QString(logData.m_address.toString() + " "
                              + QString::number(logData.m_port) + ":\n"));
 
         text.append(QObject::tr("\nStarted programs:\n"));
         for(auto i : logData.m_startedPrograms) {
-
             text.append("    " + i + "\n");
         }
 
         text.append(QObject::tr("\nFailed to start programs:\n"));
         for(auto i : logData.m_StartProgramErrors) {
-
             text.append("    " + i + "\n");
         }
 
         text.append(QObject::tr("\nSelf-terminated programs:\n"));
         for(auto i : logData.m_selfTerminatedPrograms) {
-
             text.append("    " + i + "\n");
         }
 
         text.append(QObject::tr("\nTimeouted programs:\n"));
         for(auto i : logData.m_timeoutTerminatedPrograms) {
-
             text.append("    " + i + "\n");
         }
 
@@ -106,7 +89,6 @@ void LogCollector::writeLog(qintptr descriptor) {
 
         QFile file(QDir::tempPath() + "/" + LOGFILENAME);
         if(file.open(QIODevice::Append | QIODevice::Text)) {
-
             file.write(text.toLocal8Bit());
             file.close();
         }
@@ -114,9 +96,7 @@ void LogCollector::writeLog(qintptr descriptor) {
 }
 
 LogCollector::~LogCollector() {
-
     for(auto i : m_logDataHash) {
-
         writeLog(i.m_desctiptor);
     }
 }

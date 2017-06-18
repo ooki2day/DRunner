@@ -14,7 +14,8 @@ class ProcessLauncher : public QObject
     Q_OBJECT
 public:
     ProcessLauncher();
-    void setAllowedList(const QStringList &list) { m_allowedProgrammsList = list; qSort(m_allowedProgrammsList); }
+    void setAllowedList(const QStringList &list) { m_allowedProgrammsList = list;
+                                                   qSort(m_allowedProgrammsList); }
 
     ~ProcessLauncher();
 

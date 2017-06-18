@@ -33,8 +33,10 @@ private:
 private:
     Server *m_server;
     QThread *m_serverThread;
+
     ProcessLauncher *m_launcher;
     QThread *m_launcherThread;
+
     LogCollector *m_logCollector;
     QThread *m_logCollectorThread;
 };

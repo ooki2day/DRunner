@@ -17,7 +17,6 @@ void DRunner::initLogFile() {
 
     QFile file(QDir::tempPath() + "/" + QString(LOGFILENAME));
     if(file.open(QIODevice::WriteOnly)) {
-
         file.close();
         return;
     }
@@ -31,10 +30,8 @@ void DRunner::parseArgs(const QStringList &list) {
 
     QFile file;
     for(int i = 1; i < list.size(); ++i) {
-
         file.setFileName(list.at(i));
         if(file.exists()) {
-
             readAllowedProgramsFromFile(file);
             file.close();
             return;
@@ -47,23 +44,17 @@ void DRunner::parseArgs(const QStringList &list) {
 void DRunner::readAllowedProgramsFromFile(QFile &file) {
 
     if(file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-
         QStringList list;
         while(!file.atEnd()) {
-
             list.append(file.readLine().simplified());
         }
-
         m_launcher->setAllowedList(list);
-
     } else {
-
         logMessage(QObject::tr("Can't open the file with allowed programs."));
     }
 }
 
 void DRunner::start() {
-
     serverInit();
     launcherInit();
     initLogFile();
@@ -73,7 +64,6 @@ void DRunner::start() {
 }
 
 void DRunner::serverInit() {
-
     m_server = new Server;
     m_server->moveToThread(m_serverThread);
     m_serverThread->start();
@@ -85,7 +75,6 @@ void DRunner::serverInit() {
 }
 
 void DRunner::launcherInit() {
-
     m_launcher = new ProcessLauncher;
     m_launcher->moveToThread(m_launcherThread);
     m_launcherThread->start();
@@ -99,7 +88,6 @@ void DRunner::launcherInit() {
 }
 
 void DRunner::logCollectorInit() {
-
     m_logCollector = new LogCollector;
     m_logCollector->moveToThread(m_logCollectorThread);
     m_logCollectorThread->start();
@@ -125,17 +113,14 @@ void DRunner::logCollectorInit() {
 }
 
 void DRunner::serverStateChanged(bool connected) {
-
     if(!connected) {
-
         logMessage("Server disconnected!");
         auto app = application();
         app->quit();
     }
 }
 
-DRunner::~DRunner()
-{
+DRunner::~DRunner() {
     m_serverThread->quit();
     m_launcherThread->quit();
     m_logCollectorThread->quit();
@@ -143,7 +128,7 @@ DRunner::~DRunner()
     m_launcherThread->wait();
     m_logCollectorThread->wait();
 
-    delete m_serverThread;
-    delete m_launcherThread;
-    delete m_logCollectorThread;
+    m_serverThread->deleteLater();
+    m_launcherThread->deleteLater();
+    m_logCollectorThread->deleteLater();
 }

@@ -9,14 +9,12 @@
 namespace Utils {
 
 struct ParsedData {
-
     QString m_program;
     QStringList m_args;
     qint32 m_timeout = 0;
 };
 
 struct SocketData {
-
     qintptr m_descriptor = 0;
     QHostAddress m_address;
     quint16 m_port = 0;
@@ -24,7 +22,6 @@ struct SocketData {
 };
 
 struct LogData {
-
     qintptr m_desctiptor = 0;
     QHostAddress m_address;
     quint16 m_port = 0;

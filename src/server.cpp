@@ -14,7 +14,6 @@ Server::Server(QObject *parent) :
 }
 
 void Server::newConnection() {
-
     auto socket = m_server->nextPendingConnection();
     m_descriptorsHash[socket->socketDescriptor()] = socket;
     m_socketHash[socket] = socket->socketDescriptor();
@@ -24,11 +23,9 @@ void Server::newConnection() {
 }
 
 void Server::socketReadyRead() {
-
     auto sock = (QTcpSocket*)sender();
 
     if(sock->canReadLine()) {
-
         auto data = sock->readLine();
 
         Parser *parser = new Parser { sock->socketDescriptor(), data };
@@ -41,36 +38,31 @@ void Server::socketReadyRead() {
 }
 
 void Server::sendToSocket(qintptr descriptor, const QByteArray &data) {
-
     if(m_descriptorsHash.contains(descriptor)) {
-
         m_descriptorsHash[descriptor]->write(data);
     }
 }
 
 void Server::closeSocket() {
-
     auto sock = (QTcpSocket*)sender();
 
     if(m_socketHash.contains(sock)) {
-
         emit socketDisconnected(m_socketHash[sock]);
         m_socketHash.remove(sock);
     }
-    if(m_descriptorsHash.contains(sock->socketDescriptor()))
+    if(m_descriptorsHash.contains(sock->socketDescriptor())) {
         m_descriptorsHash.remove(sock->socketDescriptor());
+    }
 
     sock->deleteLater();
 }
 
 void Server::closeServer() {
-
     m_descriptorsHash.clear();
     m_socketHash.clear();
     m_server->close();
 }
 
 Server::~Server() {
-
     closeServer();
 }

@@ -36,11 +36,9 @@ HEADERS  += qt-solutions/qtservice/src/QtService \
     src/logcollector.h
 
 win32-g++: CONFIG(release, debug|release): {
-
     SOURCES += qt-solutions/qtservice/src/qtservice_win.cpp
 }
 
 unix: {
-
     SOURCES += qt-solutions/qtservice/src/qtservice_unix.cpp
 }
