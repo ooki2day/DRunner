@@ -24,6 +24,8 @@ void Server::newConnection() {
 
 void Server::socketReadyRead() {
     auto sock = (QTcpSocket*)sender();
+    if(!sock)
+        return;
 
     if(sock->canReadLine()) {
         auto data = sock->readLine();
@@ -32,7 +34,8 @@ void Server::socketReadyRead() {
         connect(parser, &Parser::socketDataReady,
                 this, &Server::parsedDataReady);
 
-        emit recvDataFromSocket(sock->socketDescriptor(), sock->peerAddress(), sock->peerPort(), data.size());
+        emit recvDataFromSocket(sock->socketDescriptor(), sock->peerAddress(),
+                                sock->peerPort(), data.size());
         QThreadPool::globalInstance()->start(parser);
     }
 }
@@ -58,7 +61,7 @@ void Server::closeSocket() {
 }
 
 void Server::closeServer() {
-    m_descriptorsHash.clear();
+    qDeleteAll(m_descriptorsHash);
     m_socketHash.clear();
     m_server->close();
 }

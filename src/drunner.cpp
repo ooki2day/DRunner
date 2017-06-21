@@ -6,10 +6,6 @@ DRunner::DRunner(int argc, char **argv) :
     setServiceDescription("A dummy HTTP service implemented with Qt");
     setServiceFlags(QtServiceBase::CanBeSuspended);
 
-    m_serverThread = new QThread();
-    m_launcherThread = new QThread();
-    m_logCollectorThread = new QThread();
-
     qRegisterMetaType<qintptr>("qintptr");
 }
 
@@ -65,6 +61,7 @@ void DRunner::start() {
 
 void DRunner::serverInit() {
     m_server = new Server;
+    m_serverThread = new QThread;
     m_server->moveToThread(m_serverThread);
     m_serverThread->start();
 
@@ -76,6 +73,7 @@ void DRunner::serverInit() {
 
 void DRunner::launcherInit() {
     m_launcher = new ProcessLauncher;
+    m_launcherThread = new QThread;
     m_launcher->moveToThread(m_launcherThread);
     m_launcherThread->start();
 
@@ -89,6 +87,7 @@ void DRunner::launcherInit() {
 
 void DRunner::logCollectorInit() {
     m_logCollector = new LogCollector;
+    m_logCollectorThread = new QThread;
     m_logCollector->moveToThread(m_logCollectorThread);
     m_logCollectorThread->start();
 
