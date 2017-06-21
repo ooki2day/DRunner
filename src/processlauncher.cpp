@@ -92,10 +92,10 @@ void ProcessLauncher::stopAllProcesses() {
     for(auto i : m_activeProcessesList) {
         i->close();
     }
-    m_activeProcessesList.clear();
+    qDeleteAll(m_activeProcessesList);
 }
 
 ProcessLauncher::~ProcessLauncher() {
-    m_timeredProcessMap.clear();
+    qDeleteAll(m_timeredProcessMap);
     stopAllProcesses();
 }
